@@ -28,7 +28,7 @@ RUN apk add --update --no-cache python3-dev=~3.11 gcc musl-dev \
     pip3 install confluent-kafka==2.1.1 && \
     apk del python3-dev gcc musl-dev
 
-COPY als/requirements.txt $WORKDIR
+COPY ./als/requirements.txt $WORKDIR
 RUN pip3 install --no-cache-dir --root-user-action=ignore -r requirements.txt
 
 COPY src/afc-packages /wd/afc-packages
