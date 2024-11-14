@@ -111,7 +111,7 @@ services:
       - rcache
 
   afcserver:
-    image: afcserver-image:latest
+    image: afcserver:latest
     restart: always
     environment:
       - AFC_SERVER_PORT=8000
