@@ -1,6 +1,5 @@
 # check .env file for env vars info and values
 
-version: '3.2'
 services:
   ratdb:
     image: ${PUB_REPO:-ghcr.io/open-afc-project}/ratdb-image:${TAG:-latest}
