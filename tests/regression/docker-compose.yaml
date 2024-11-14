@@ -2,49 +2,17 @@
 
 services:
   ratdb:
-    image: ratdb
+    image: ratdb:latest
     restart: always
     dns_search: [.]
 
   rmq:
-    image: rmq
+    image: rmq:latest
     restart: always
-    dns_search: [.]
-
-  dispatcher:
-    image: dispatcher
-    restart: always
-    ports:
-      - "${EXT_PORT}:80"
-      - "${EXT_PORT_S}:443"
-    volumes:
-      - ${VOL_H_NGNX:-/tmp}:${VOL_C_NGNX:-/dummyngnx}
-    environment:
-      - AFC_SERVER_NAME=${AFC_SERVER_NAME:-_}
-      - AFC_ENFORCE_HTTPS=${AFC_ENFORCE_HTTPS:-TRUE}
-      # set to true if required to enforce mTLS check
-      - AFC_ENFORCE_MTLS=false
-      - AFC_MSGHND_NAME=${AFC_REQ_SERVER}
-      - AFC_MSGHND_PORT=8000
-      - AFC_WEBUI_NAME=rat_server
-      - AFC_WEBUI_PORT=80
-      # Filestorage params:
-      - AFC_OBJST_HOST=objst
-      - AFC_OBJST_PORT=5000
-      - AFC_OBJST_SCHEME=HTTP
-      # Prometheus params:
-      - AFC_PROMETHEUS_TARGET=prometheus:9090
-      - AFC_PROMETHEUS_ENABLED=true
-    depends_on:
-      - afcserver
-      - msghnd
-      - rat_server
-      - prometheus
-      - grafana
     dns_search: [.]
 
   rat_server:
-    image: rat_server
+    image: rat_server:latest
     volumes:
       - ${VOL_H_DB}:${VOL_C_DB}
       - ./pipe:/pipe
@@ -95,7 +63,7 @@ services:
       - RCACHE_RMQ_DSN=amqp://rcache:rcache@rmq:5672/rcache
 
   msghnd:
-    image: msghnd
+    image: msghnd:latest
     environment:
       - FLASKFILE_SQLALCHEMY_DATABASE_PASSWORD=${VOL_C_SECRETS}/RATDB_PASSWORD
       - FLASKFILE_SECRET_KEY=${VOL_C_SECRETS}/FLASK_SECRET_KEY
@@ -143,7 +111,7 @@ services:
       - rcache
 
   afcserver:
-    image: ${PRIV_REPO:-ghcr.io/open-afc-project}/afcserver-image:${TAG:-latest}
+    image: afcserver-image:latest
     restart: always
     environment:
       - AFC_SERVER_PORT=8000
@@ -177,7 +145,7 @@ services:
       - objst
 
   objst:
-    image: objst
+    image: objst:latest
     environment:
       - AFC_OBJST_PORT=5000
       - AFC_OBJST_HIST_PORT=4999
@@ -202,7 +170,7 @@ services:
     dns_search: [.]
 
   worker:
-    image: ${PRIV_REPO:-ghcr.io/open-afc-project}/afc-worker:${TAG:-latest}
+    image: worker:latest
     volumes:
       - ${VOL_H_DB}:${VOL_C_DB}
       - ./pipe:/pipe
@@ -237,7 +205,7 @@ services:
     dns_search: [.]
 
   als_kafka:
-    image: ${PUB_REPO:-ghcr.io/open-afc-project}/als-kafka-image:${TAG:-latest}
+    image: als_kafka:latest
     restart: always
     environment:
       - KAFKA_ADVERTISED_HOST=${ALS_KAFKA_SERVER_}
@@ -246,7 +214,7 @@ services:
     dns_search: [.]
 
   als_siphon:
-    image: ${PUB_REPO:-ghcr.io/open-afc-project}/als-siphon-image:${TAG:-latest}
+    image: als_siphon:latest
     restart: always
     environment:
       - KAFKA_SERVERS=${ALS_KAFKA_SERVER_}:${ALS_KAFKA_CLIENT_PORT_}
@@ -268,11 +236,11 @@ services:
     dns_search: [.]
 
   bulk_postgres:
-    image: ${PUB_REPO:-ghcr.io/open-afc-project}/bulk-postgres-image:${TAG:-latest}
+    image: bulk_postgres:latest
     dns_search: [.]
 
   uls_downloader:
-    image: ${PUB_REPO:-ghcr.io/open-afc-project}/uls-downloader:${TAG:-latest}
+    image: uls_downloader:latest
     restart: always
     environment:
       - ULS_AFC_URL=http://${AFC_REQ_SERVER}:8000/fbrat/ap-afc/availableSpectrumInquiryInternal?nocache=True
@@ -300,7 +268,7 @@ services:
     dns_search: [.]
 
   cert_db:
-    image: cert_db
+    image: cert_db:latest
     depends_on:
       - ratdb
     links:
@@ -329,7 +297,7 @@ services:
       - OIDC_CLIENT_SECRET
 
   rcache:
-    image: rcache
+    image: rcache:latest
     restart: always
     environment:
       - RCACHE_ENABLED=${RCACHE_ENABLED}
@@ -349,38 +317,6 @@ services:
       - bulk_postgres
     dns_search: [.]
 
-  grafana:
-    image: ${PUB_REPO:-ghcr.io/open-afc-project}/grafana-image:${TAG:-latest}
-    restart: always
-    depends_on:
-      - prometheus
-      - bulk_postgres
-    dns_search: [.]
-
-  prometheus:
-    image: ${PUB_REPO:-ghcr.io/open-afc-project}/prometheus-image:${TAG:-latest}
-    restart: always
-    depends_on:
-      - cadvisor
-    dns_search: [.]
-
-  cadvisor:
-    image:  ${PUB_REPO:-ghcr.io/open-afc-project}/cadvisor-image:${TAG:-latest}
-    restart: always
-    volumes:
-    - /:/rootfs:ro
-    - /var/run:/var/run:rw
-    - /sys:/sys:ro
-    - /var/lib/docker/:/var/lib/docker:ro
-    - /dev/disk/:/dev/disk:ro
-    dns_search: [.]
-
-  nginxexporter:
-    image: ${PUB_REPO:-ghcr.io/open-afc-project}/nginxexporter-image:${TAG:-latest}
-    restart: always
-    depends_on:
-      - dispatcher
-    dns_search: [.]
 
 secrets:
   ALS_DB_PASSWORD:
