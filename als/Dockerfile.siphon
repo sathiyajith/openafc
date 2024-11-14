@@ -31,7 +31,7 @@ RUN apk add --update --no-cache python3-dev=~3.11 gcc musl-dev \
 COPY /home/grads/sxk6394/openafc/als/requirements.txt $WORKDIR
 RUN pip3 install --no-cache-dir --root-user-action=ignore -r requirements.txt
 
-COPY src/afc-packages /wd/afc-packages
+COPY /home/grads/sxk6394/openafc/src/afc-packages /wd/afc-packages
 RUN pip3 install --use-pep517 --root-user-action=ignore \
         -r /wd/afc-packages/pkgs.als_siphon \
     && rm -rf /wd/afc-packages
@@ -84,11 +84,11 @@ ENV ALEMBIC_CONFIG=$WORKDIR/als_migrations/alembic.ini
 # Alembic version of last pre-alembic (first alembic) ALS database
 ENV ALS_ALEMBIC_INITIAL_VERSION=4aaf4b7e53f5
 
-COPY als/als_siphon.py als/als_query.py als/utils.py $WORKDIR
-COPY als/als_migrations $WORKDIR/als_migrations
+COPY /home/grads/sxk6394/openafc/als/als_siphon.py als/als_query.py als/utils.py $WORKDIR
+COPY /home/grads/sxk6394/openafc/als/als_migrations $WORKDIR/als_migrations
 
 RUN chmod a+x $WORKDIR/als_*.py
-COPY als/ALS.sql $WORKDIR
+COPY /home/grads/sxk6394/openafc/als/ALS.sql $WORKDIR
 
 ENTRYPOINT /usr/app/als_siphon.py init_siphon \
     --kafka_servers=$KAFKA_SERVERS \
